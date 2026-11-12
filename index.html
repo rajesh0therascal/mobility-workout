@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B7F92">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mobility">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Guided Mobility Workout</title>
+<style>
+:root{--bg:#EAF1F4;--card:#fff;--ink:#12303B;--mute:#5B7480;--line:#D3E0E6;--acc:#1B7F92;--acc2:#0E5A69;--rest:#C98A12;--soft:#D9EDF1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1B22;--card:#14272F;--ink:#E5F1F4;--mute:#8FA9B3;--line:#25414C;--acc:#4CC3D8;--acc2:#7ED6E6;--rest:#F0B84A;--soft:#1B3844}}
+:root[data-theme="dark"]{--bg:#0D1B22;--card:#14272F;--ink:#E5F1F4;--mute:#8FA9B3;--line:#25414C;--acc:#4CC3D8;--acc2:#7ED6E6;--rest:#F0B84A;--soft:#1B3844}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;min-height:100%;-webkit-font-smoothing:antialiased}
+.wrap{max-width:520px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:1.05rem;font-weight:500;margin:0 0 12px;color:var(--mute)}
+.segs{display:flex;gap:5px;margin-bottom:14px}
+.seg{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden;cursor:pointer}
+.seg i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+.card{background:var(--card);border-radius:22px;padding:20px 16px 18px;text-align:center;border:1px solid var(--line)}
+.grp{font-size:.9rem;color:var(--acc2);font-weight:500}
+.name{font-size:1.5rem;font-weight:700;line-height:1.2;margin:4px 0 2px;min-height:2.4em;display:flex;align-items:center;justify-content:center}
+.cue{color:var(--mute);font-size:.9rem;font-weight:300;min-height:2.6em;margin:0 8px}
+.ringbox{position:relative;width:260px;height:260px;margin:8px auto 0}
+.ringbox>svg{position:absolute;inset:0}
+.ring-bg{fill:none;stroke:var(--line);stroke-width:8}
+.ring-fg{fill:none;stroke:var(--acc);stroke-width:8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:130px 130px;transition:stroke-dashoffset .3s linear,stroke .3s}
+.rest .ring-fg{stroke:var(--rest)}
+.stage{position:absolute;left:30px;top:30px;width:200px;height:200px;border-radius:50%;background:var(--soft)}
+.stage svg{width:100%;height:100%}
+.time{font-size:3.6rem;font-weight:300;line-height:1;margin-top:6px;font-variant-numeric:tabular-nums}
+.phase{font-size:.95rem;color:var(--mute);margin-top:4px;height:1.3em}
+.rest .phase{color:var(--rest);font-weight:500}
+.ctrls{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:14px}
+button{font:inherit;cursor:pointer;border:0;color:var(--ink)}
+.rb{width:50px;height:50px;border-radius:50%;background:var(--soft);display:grid;place-items:center}
+.rb svg,.pb svg{width:22px;height:22px;fill:currentColor}
+.pb{width:76px;height:76px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center}
+.pb svg{width:30px;height:30px}
+:root:not([data-theme="light"]) .pb{color:#07222A}
+button:focus-visible,.seg:focus-visible,li:focus-visible{outline:3px solid var(--rest);outline-offset:2px}
+.set{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.set label{flex:1;min-width:140px;font-size:.8rem;color:var(--mute);display:flex;flex-direction:column;gap:4px;text-align:left}
+select{font:inherit;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.list{margin-top:18px}
+.list h2{font-size:.95rem;margin:14px 0 6px;font-weight:700}
+ul{list-style:none;margin:0;padding:0;background:var(--card);border-radius:16px;border:1px solid var(--line);overflow:hidden}
+li{padding:11px 14px;display:flex;justify-content:space-between;gap:8px;cursor:pointer;font-size:.92rem;border-bottom:1px solid var(--line)}
+li:last-child{border-bottom:0}
+li.cur{background:var(--soft);font-weight:500}
+li.done{color:var(--mute)}
+li.done::after{content:"Done";font-size:.75rem;color:var(--acc2)}
+.done-msg{display:none;padding:26px 8px}
+.finished .done-msg{display:block}
+.finished .live{display:none}
+.done-msg b{font-size:1.5rem;display:block;margin-bottom:8px}
+.done-msg button{margin-top:14px;padding:12px 22px;border-radius:24px;background:var(--acc);color:#fff;font-weight:500}
+.paused .anim{animation-play-state:paused!important}
+/* motion */
+.stage{overflow:hidden}
+.stage .m{transform-box:view-box}
+.dg{transform-box:fill-box;transform-origin:50% 100%}
+.sk{fill:#DDA67E;stroke:#B97F58;stroke-width:1.5}
+.cl{fill:var(--acc)}.pt{fill:#33495B}.ptb{fill:#26394A}.hr{fill:#3B2A22}.ey{fill:#2B1D17}
+.ln{fill:none;stroke:#7A4C33;stroke-width:2.5;stroke-linecap:round}
+.fl{stroke:var(--ink);opacity:.25;stroke-width:2}
+.stage.paused *{animation-play-state:paused!important}
+.rev *{animation-direction:reverse!important}
+.an-stretch .ft{animation:pnt var(--d) ease-in-out infinite}
+.an-circ .ft{animation:circF var(--d) linear infinite}
+.an-circ .hd{animation:circH var(--d) linear infinite}
+.an-spread .dg1{animation:s1 var(--d) ease-in-out infinite}
+.an-spread .dg2{animation:s2 var(--d) ease-in-out infinite}
+.an-spread .dg4{animation:s4 var(--d) ease-in-out infinite}
+.an-spread .dg5{animation:s5 var(--d) ease-in-out infinite}
+.an-curl .dg{animation:curl var(--d) ease-in-out infinite}
+.an-nod .fc{animation:fy var(--d) ease-in-out infinite}
+.an-look .fc{animation:fx var(--d) ease-in-out infinite}
+.an-htilt .hg{animation:ht var(--d) ease-in-out infinite}
+.an-hrot .hg{animation:hr var(--d) linear infinite}
+.an-hrot .fc{animation:hf var(--d) linear infinite}
+.an-lift .lgA,.an-lift .lgB,.an-lift1 .lgA{animation:lift var(--d) ease-in-out infinite alternate}
+.an-cyc .lg{animation:cth var(--d) ease-in-out infinite alternate}
+.an-cyc .sh{animation:csh var(--d) ease-in-out infinite alternate}
+.an-cyc .lgB,.an-cyc .lgB .sh{animation-delay:calc(var(--d)*-1)}
+.an-fb .tr{animation:fb var(--d) ease-in-out infinite}
+.an-sb .tr{animation:sb var(--d) ease-in-out infinite}
+.an-tw .tr{animation:tw var(--d) ease-in-out infinite}
+.an-tw .fc2{animation:twf var(--d) ease-in-out infinite}
+.an-cross .al{animation:crL var(--d) ease-in-out infinite}
+.an-cross .ar2{animation:crR var(--d) ease-in-out infinite}
+.an-up .al{animation:upL var(--d) ease-in-out infinite}
+.an-up .ar2{animation:upR var(--d) ease-in-out infinite}
+.an-spin .al,.an-spin .ar2{animation:spn var(--d) linear infinite}
+.lw{stroke:#33495B;stroke-linecap:round;fill:none}
+.an-fly .bt{animation:bth var(--d) ease-in-out infinite alternate}
+.an-fly .bs{animation:bsh var(--d) ease-in-out infinite alternate}
+@keyframes bth{0%{transform:rotate(-14deg)}100%{transform:rotate(14deg)}}
+@keyframes bsh{0%{transform:rotate(9deg)}100%{transform:rotate(-9deg)}}
+@keyframes pnt{0%,100%{transform:rotate(-24deg)}50%{transform:rotate(32deg)}}
+@keyframes circF{0%,100%{transform:rotate(-22deg)}25%{transform:rotate(0) translateX(5px)}50%{transform:rotate(22deg)}75%{transform:rotate(0) translateX(-5px)}}
+@keyframes circH{0%,100%{transform:rotate(-22deg)}25%{transform:rotate(0) translateY(-5px)}50%{transform:rotate(22deg)}75%{transform:rotate(0) translateY(5px)}}
+@keyframes s1{0%,100%{transform:rotate(0)}50%{transform:rotate(-20deg)}}
+@keyframes s2{0%,100%{transform:rotate(0)}50%{transform:rotate(-10deg)}}
+@keyframes s4{0%,100%{transform:rotate(0)}50%{transform:rotate(10deg)}}
+@keyframes s5{0%,100%{transform:rotate(0)}50%{transform:rotate(20deg)}}
+@keyframes curl{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.42)}}
+@keyframes fy{0%,100%{transform:translateY(9px)}50%{transform:translateY(-9px)}}
+@keyframes fx{0%,100%{transform:translateX(-18px)}50%{transform:translateX(18px)}}
+@keyframes ht{0%,100%{transform:rotate(-24deg)}50%{transform:rotate(24deg)}}
+@keyframes hr{0%,100%{transform:rotate(-18deg)}25%{transform:rotate(0)}50%{transform:rotate(18deg)}75%{transform:rotate(0)}}
+@keyframes hf{0%,50%,100%{transform:translateY(0)}25%{transform:translateY(8px)}75%{transform:translateY(-8px)}}
+@keyframes lift{0%{transform:rotate(0)}100%{transform:rotate(-40deg)}}
+@keyframes cth{0%{transform:rotate(-78deg)}100%{transform:rotate(-20deg)}}
+@keyframes csh{0%{transform:rotate(100deg)}100%{transform:rotate(6deg)}}
+@keyframes fb{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(50deg)}}
+@keyframes sb{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}
+@keyframes tw{0%,50%,100%{transform:scaleX(1)}25%,75%{transform:scaleX(.6)}}
+@keyframes twf{0%,50%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+@keyframes crL{0%,100%{transform:rotate(90deg) scaleY(1)}50%{transform:rotate(90deg) scaleY(-.7)}}
+@keyframes crR{0%,100%{transform:rotate(-90deg) scaleY(1)}50%{transform:rotate(-90deg) scaleY(-.7)}}
+@keyframes upL{0%,100%{transform:rotate(0)}50%{transform:rotate(170deg)}}
+@keyframes upR{0%,100%{transform:rotate(0)}50%{transform:rotate(-170deg)}}
+@keyframes spn{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.stage *{animation-duration:8s!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <h1>Guided mobility workout</h1>
+  <div class="segs" id="segs"></div>
+  <div class="card paused" id="card">
+    <div class="live">
+      <div class="grp" id="grp"></div>
+      <div class="name" id="name"></div>
+      <p class="cue" id="cue"></p>
+      <div class="ringbox" id="rbox">
+        <svg viewBox="0 0 260 260" aria-hidden="true"><circle class="ring-bg" cx="130" cy="130" r="122"/><circle class="ring-fg" id="rfg" cx="130" cy="130" r="122"/></svg>
+        <div class="stage" id="stage">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+<g class="sc" data-s="foot">
+<rect class="pt" x="80" y="0" width="38" height="70" rx="4"/>
+<rect class="sk" x="84" y="60" width="30" height="66" rx="14"/>
+<g class="m ft" style="transform-origin:99px 122px"><path class="sk" d="M86 112 H116 C148 118 178 134 180 152 C180 163 170 168 158 168 H92 C80 168 76 156 80 144 Z"/><ellipse cx="171" cy="156" rx="6" ry="4" fill="#F3D2B8"/></g>
+</g>
+<g class="sc" data-s="toes">
+<rect class="sk dg dg1" x="66" y="66" width="22" height="42" rx="11"/>
+<rect class="sk dg dg2" x="90" y="76" width="16" height="32" rx="8"/>
+<rect class="sk dg dg3" x="108" y="82" width="15" height="26" rx="7.5"/>
+<rect class="sk dg dg4" x="124" y="86" width="14" height="22" rx="7"/>
+<rect class="sk dg dg5" x="139" y="90" width="12" height="18" rx="6"/>
+<ellipse class="sk" cx="100" cy="152" rx="42" ry="50"/>
+</g>
+<g class="sc" data-s="hand">
+<rect class="sk" x="76" y="140" width="48" height="70" rx="10"/>
+<g class="m hd" style="transform-origin:100px 150px">
+<g transform="rotate(-42 70 132)"><rect class="sk dg dg1" x="62" y="90" width="16" height="42" rx="8"/></g>
+<rect class="sk dg dg2" x="70" y="38" width="15" height="66" rx="7.5"/>
+<rect class="sk dg dg3" x="87" y="30" width="15" height="74" rx="7.5"/>
+<rect class="sk dg dg4" x="104" y="36" width="15" height="68" rx="7.5"/>
+<rect class="sk dg dg5" x="121" y="50" width="13" height="54" rx="6.5"/>
+<rect class="sk" x="68" y="96" width="66" height="60" rx="20"/>
+</g>
+<rect class="cl" x="70" y="172" width="60" height="40" rx="6"/>
+</g>
+<g class="sc" data-s="head">
+<rect class="sk" x="86" y="120" width="28" height="42"/>
+<path class="cl" d="M14 200 C16 166 56 156 80 152 H120 C144 156 184 166 186 200Z"/>
+<g class="m hg" style="transform-origin:100px 150px">
+<ellipse class="sk" cx="63" cy="86" rx="6" ry="10"/><ellipse class="sk" cx="137" cy="86" rx="6" ry="10"/>
+<ellipse class="sk" cx="100" cy="84" rx="36" ry="44"/>
+<path class="hr" d="M63 80 C60 38 80 34 100 34 C122 34 140 40 137 80 C128 62 114 56 100 56 C86 56 72 62 63 80Z"/>
+<g class="m fc"><ellipse class="ey" cx="86" cy="86" rx="4" ry="5"/><ellipse class="ey" cx="114" cy="86" rx="4" ry="5"/>
+<path class="ln" d="M78 74 q8 -5 16 0 M106 74 q8 -5 16 0 M100 88 q-6 14 0 17 M89 116 q11 7 22 0"/></g>
+</g>
+</g>
+<g class="sc" data-s="lying">
+<line class="fl" x1="10" y1="152" x2="190" y2="152"/>
+<g class="m lg lgB" style="transform-origin:96px 136px"><rect class="ptb" x="92" y="127" width="48" height="18" rx="9"/>
+<g class="m sh" style="transform-origin:136px 136px"><rect class="ptb" x="132" y="129" width="44" height="15" rx="7.5"/><ellipse class="sk" cx="180" cy="138" rx="8" ry="6"/></g></g>
+<rect class="sk" x="44" y="143" width="48" height="8" rx="4"/>
+<rect class="cl" x="34" y="122" width="64" height="28" rx="14"/>
+<circle class="sk" cx="22" cy="134" r="14"/>
+<path class="hr" d="M8 134 C8 118 30 116 34 130 C28 124 18 126 8 134Z"/>
+<g class="m lg lgA" style="transform-origin:96px 136px"><rect class="pt" x="92" y="127" width="48" height="18" rx="9"/>
+<g class="m sh" style="transform-origin:136px 136px"><rect class="pt" x="132" y="129" width="44" height="15" rx="7.5"/><ellipse class="sk" cx="180" cy="138" rx="8" ry="6"/></g></g>
+</g>
+<g class="sc" data-s="side">
+<line class="fl" x1="10" y1="190" x2="190" y2="190"/>
+<rect class="pt" x="88" y="116" width="24" height="72" rx="10"/><ellipse class="ey" cx="114" cy="187" rx="18" ry="5"/>
+<g class="m tr" style="transform-origin:100px 122px">
+<rect class="cl" x="86" y="52" width="30" height="76" rx="14"/>
+<rect class="sk" x="94" y="60" width="12" height="58" rx="6"/>
+<circle class="sk" cx="102" cy="34" r="15"/>
+<path class="hr" d="M87 34 C86 18 100 16 108 20 C116 22 118 30 116 34 C110 28 98 26 87 34Z"/>
+<circle class="ey" cx="110" cy="33" r="2"/></g>
+</g>
+<g class="sc" data-s="front">
+<line class="fl" x1="10" y1="192" x2="190" y2="192"/>
+<rect class="pt" x="80" y="122" width="19" height="66" rx="8"/><rect class="pt" x="101" y="122" width="19" height="66" rx="8"/>
+<rect class="ey" x="76" y="186" width="24" height="6" rx="3"/><rect class="ey" x="100" y="186" width="24" height="6" rx="3"/>
+<g class="m tr" style="transform-origin:100px 126px">
+<rect class="cl" x="72" y="60" width="56" height="70" rx="16"/>
+<g class="m al" style="transform-origin:68px 72px"><rect class="sk" x="62" y="66" width="12" height="60" rx="6"/><circle class="cl" cx="68" cy="72" r="9"/></g>
+<g class="m ar2" style="transform-origin:132px 72px"><rect class="sk" x="126" y="66" width="12" height="60" rx="6"/><circle class="cl" cx="132" cy="72" r="9"/></g>
+<rect class="sk" x="93" y="50" width="14" height="14"/>
+<circle class="sk" cx="100" cy="40" r="17"/>
+<path class="hr" d="M83 38 C82 20 96 20 100 20 C106 20 118 22 117 38 C112 30 106 28 100 28 C94 28 88 30 83 38Z"/>
+<g class="m fc2"><circle class="ey" cx="94" cy="41" r="2"/><circle class="ey" cx="106" cy="41" r="2"/><path class="ln" style="stroke-width:1.5" d="M95 49 q5 3 10 0"/></g>
+</g>
+</g>
+<g class="sc" data-s="butterfly">
+<line class="fl" x1="10" y1="172" x2="190" y2="172"/>
+<rect class="cl" x="76" y="50" width="48" height="80" rx="18"/>
+<rect class="sk" x="93" y="40" width="14" height="14"/>
+<circle class="sk" cx="100" cy="30" r="17"/>
+<path class="hr" d="M83 28 C82 10 96 10 100 10 C106 10 118 12 117 28 C112 20 106 18 100 18 C94 18 88 20 83 28Z"/>
+<circle class="ey" cx="94" cy="31" r="2"/><circle class="ey" cx="106" cy="31" r="2"/><path class="ln" style="stroke-width:1.5" d="M95 39 q5 3 10 0"/>
+<rect class="pt" x="84" y="112" width="32" height="24" rx="10"/>
+<g class="m bt" style="transform-origin:94px 126px"><line class="lw" x1="94" y1="126" x2="54" y2="142" stroke-width="18"/><g class="m bs" style="transform-origin:54px 142px"><line class="lw" x1="54" y1="142" x2="98" y2="162" stroke-width="15"/><circle class="sk" cx="98" cy="162" r="7"/></g></g><g transform="translate(200,0) scale(-1,1)"><g class="m bt" style="transform-origin:94px 126px"><line class="lw" x1="94" y1="126" x2="54" y2="142" stroke-width="18"/><g class="m bs" style="transform-origin:54px 142px"><line class="lw" x1="54" y1="142" x2="98" y2="162" stroke-width="15"/><circle class="sk" cx="98" cy="162" r="7"/></g></g></g>
+<circle class="sk" cx="100" cy="163" r="8"/>
+</g>
+<text id="dir" x="12" y="34" font-size="30" font-weight="700" fill="var(--rest)"></text>
+          </svg>
+        </div>
+      </div>
+      <div class="time" id="time">30</div>
+      <div class="phase" id="phase">Press play to start</div>
+      <div class="ctrls">
+        <button class="rb" id="prev" aria-label="Previous exercise"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12L9.5 12z"/></svg></button>
+        <button class="pb" id="play" aria-label="Play"><svg viewBox="0 0 24 24" id="pico"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="rb" id="next" aria-label="Next exercise"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6l10.5 6L4 18z"/></svg></button>
+      </div>
+      <div class="set">
+        <label>Time per exercise<select id="dur"><option value="20">20 seconds</option><option value="30" selected>30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label>
+        <label>Rest between<select id="rst"><option value="0">None</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option></select></label>
+        <label>Voice guide<select id="vc"><option value="1" selected>On</option><option value="0">Off</option></select></label>
+      </div>
+    </div>
+    <div class="done-msg"><b>Workout complete</b>Great work. Your ankles, head, wrists, back and shoulders are all warmed up.<br><button id="again">Start again</button></div>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+<script>
+var G=[
+{g:"Ankles",s:[
+["Toes spreading","spread","Sit or stand. Spread your toes wide, then relax.",0],
+["Ankle stretching","stretch","Point your toes away, then pull them back toward you.",0],
+["Ankle rotation clockwise","cw","Lift one foot and circle the ankle clockwise. Switch feet halfway.",1],
+["Ankle rotation anticlockwise","ccw","Circle the ankle anticlockwise. Switch feet halfway.",1]]},
+{g:"Hips",s:[
+["Butterfly exercise","fly","Sit tall with the soles of your feet together. Gently flap your knees up and down like butterfly wings.",0]]},
+{g:"Head",s:[
+["Head up and down","ud","Slowly lower your chin, then look up. Keep shoulders relaxed.",0],
+["Look sideways","lr","Turn your head to the right, then to the left.",0],
+["Bend sideways","tilt","Tilt your ear toward each shoulder.",0],
+["Head rotation clockwise","cw","Make slow, small circles clockwise.",1],
+["Head rotation anticlockwise","ccw","Make slow, small circles anticlockwise.",1]]},
+{g:"Wrists",s:[
+["Fingers spreading","spread","Spread your fingers wide, then relax.",0],
+["Fingers stretching","stretch","Extend your fingers straight, then curl them into a loose fist.",0],
+["Wrist rotation clockwise","cw","Circle both wrists clockwise.",1],
+["Wrist rotation anticlockwise","ccw","Circle both wrists anticlockwise.",1]]},
+{g:"Back, lying down",s:[
+["Leg raises, lying face down","ud","Lie on your stomach. Lift one leg, lower it, then switch.",0],
+["Leg raises, sideways","lr","Lie on your side. Lift the top leg, lower it, then switch sides.",0],
+["Leg raises, cycling","cycle","Lie on your back and pedal your legs in the air.",0]]},
+{g:"Back, standing",s:[
+["Front and back bending","fb","Stand tall. Bend forward gently, then lean back slightly.",0],
+["Sideways bending","tilt","Slide one hand down your leg, then switch sides.",0],
+["Look backwards, alternate sides","twist","Turn your upper body and look behind you. Alternate sides.",0]]},
+{g:"Shoulders",s:[
+["Cross-body arm swings","lr","Swing your arms across your chest, one over the other.",0],
+["Upward arm swings","ud","Swing both arms up overhead, then lower them.",0],
+["Shoulder rotation clockwise","cw","Roll your shoulders in big circles clockwise.",1],
+["Shoulder rotation anticlockwise","ccw","Roll your shoulders in big circles anticlockwise.",1]]}
+];
+var S=[];G.forEach(function(g,gi){g.s.forEach(function(e){S.push({g:g.g,gi:gi,n:e[0],t:e[1],c:e[2]})})});
+var $=function(i){return document.getElementById(i)};
+var idx=0,rem=30,running=false,phase="work",timer=null,CIRC=2*Math.PI*122,done={};
+var card=$("card"),AC=null;
+function beep(f,l){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+l)}catch(e){}}
+function dur(){return +$("dur").value}
+function rst(){return +$("rst").value}
+function buildList(){var h="";G.forEach(function(g,gi){h+="<h2>"+g.g+"</h2><ul>";S.forEach(function(e,i){if(e.gi===gi)h+='<li tabindex="0" data-i="'+i+'" id="li'+i+'"><span>'+e.n+"</span></li>"});h+="</ul>"});$("list").innerHTML=h;
+$("list").onclick=function(ev){var li=ev.target.closest("li");if(li)go(+li.dataset.i)};
+$("list").onkeydown=function(ev){if((ev.key==="Enter"||ev.key===" ")&&ev.target.dataset.i){ev.preventDefault();go(+ev.target.dataset.i)}};
+var sg="";G.forEach(function(g,gi){sg+='<div class="seg" tabindex="0" role="button" aria-label="Jump to '+g.g+'" data-g="'+gi+'"><i id="sg'+gi+'"></i></div>'});$("segs").innerHTML=sg;
+$("segs").onclick=function(ev){var s=ev.target.closest(".seg");if(s)go(S.findIndex(function(e){return e.gi==s.dataset.g}))};
+$("segs").onkeydown=function(ev){if(ev.key==="Enter"&&ev.target.dataset.g)go(S.findIndex(function(e){return e.gi==ev.target.dataset.g}))}}
+var M={"Butterfly exercise":["butterfly","fly"],"Toes spreading":["toes","spread"],"Ankle stretching":["foot","stretch"],"Ankle rotation clockwise":["foot","circ",0],"Ankle rotation anticlockwise":["foot","circ",1],
+"Head up and down":["head","nod"],"Look sideways":["head","look"],"Bend sideways":["head","htilt"],"Head rotation clockwise":["head","hrot",1],"Head rotation anticlockwise":["head","hrot",0],
+"Fingers spreading":["hand","spread"],"Fingers stretching":["hand","curl"],"Wrist rotation clockwise":["hand","circ",0],"Wrist rotation anticlockwise":["hand","circ",1],
+"Leg raises, lying face down":["lying","lift"],"Leg raises, sideways":["lying","lift1"],"Leg raises, cycling":["lying","cyc"],
+"Front and back bending":["side","fb"],"Sideways bending":["front","sb"],"Look backwards, alternate sides":["front","tw"],
+"Cross-body arm swings":["front","cross"],"Upward arm swings":["front","up"],"Shoulder rotation clockwise":["front","spin",0],"Shoulder rotation anticlockwise":["front","spin",1]};
+function setAnim(e,isRest){var m=M[e.n]||["front","sb",0],st=$("stage"),rot=/circ|hrot|spin/.test(m[1]);
+st.style.setProperty("--d",(rot?3.2:m[1]==="fly"?1.4:m[1]==="cyc"?.9:m[1]==="tw"?4:2.4)+"s");
+st.className="stage an-"+(isRest?"none":m[1])+(m[2]?" rev":"")+(running?"":" paused");
+document.querySelectorAll(".sc").forEach(function(g){g.style.display=g.dataset.s===m[0]?"":"none"});
+$("dir").textContent=rot?(/anticlockwise/.test(e.n)?"\u21BA":"\u21BB"):""}
+function stageClass(){$("stage").classList.toggle("paused",!running)}
+function render(){var e=S[idx];$("grp").textContent=e.g;$("name").textContent=phase==="rest"?"Rest":e.n;
+var nx=S[phase==="rest"?idx:idx+1];
+$("cue").textContent=phase==="rest"?"Next: "+e.n:e.c;
+$("time").textContent=rem;
+$("phase").textContent=!running&&phase==="work"&&rem===dur()&&!started?"Press play to start":(phase==="rest"?"Rest and breathe":(running?"Keep going":"Paused"));
+var total=phase==="rest"?rst():dur();$("rfg").style.strokeDasharray=CIRC;$("rfg").style.strokeDashoffset=CIRC*(1-rem/total);
+$("rbox").parentNode.parentNode.classList.toggle("rest",phase==="rest");
+card.classList.toggle("paused",!running);
+$("play").setAttribute("aria-label",running?"Pause":"Play");
+$("pico").innerHTML=running?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
+S.forEach(function(x,i){var li=$("li"+i);li.className=(i===idx?"cur":"")+(done[i]?" done":"")});
+G.forEach(function(g,gi){var tot=0,dn=0;S.forEach(function(x,i){if(x.gi===gi){tot++;if(done[i]||(i===idx&&0))dn++}});$("sg"+gi).style.width=(dn/tot*100)+"%"});
+setAnim(e,phase==="rest")}
+var started=false,lastG="";
+function stopSay(){try{speechSynthesis.cancel()}catch(e){}}
+function say(t){if($("vc").value!=="1"||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.rate=.85;u.lang="en-IN";var vs=speechSynthesis.getVoices().filter(function(x){return /^en/i.test(x.lang)});var v=vs.filter(function(x){return /en[-_]IN/i.test(x.lang)})[0]||vs[0];if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+function announce(pre){var e=S[idx],t=pre||"";if(e.g!==lastG){t+="Now, "+e.g+". ";lastG=e.g}say(t+e.n+". "+e.c)}
+function load(i){idx=i;phase="work";rem=dur();render()}
+function go(i){card.classList.remove("finished");load(i);if(running)announce()}
+function tick(){rem--;if(rem>0&&rem<=3)beep(660,.1);
+if(rem<=0){if(phase==="work"){done[idx]=true;if(idx>=S.length-1){finish();return}
+beep(880,.3);if(rst()>0){phase="rest";idx++;rem=rst();say("Rest. Next, "+S[idx].n+".")}else{idx++;rem=dur();announce()}}else{phase="work";rem=dur();beep(880,.3);announce()}}else if(phase==="work"&&rem===Math.floor(dur()/2))say("Halfway. Keep going.")
+render()}
+function finish(){running=false;clearInterval(timer);card.classList.add("finished");beep(988,.5);say("Well done. You have completed all the exercises. Take a slow, deep breath.");render()}
+function toggle(){if(card.classList.contains("finished"))return;var first=!started;running=!running;started=true;clearInterval(timer);if(running){timer=setInterval(tick,1000);if(first){lastG="";announce("Let's begin. Move gently, and stop if anything hurts. ")}else if(phase==="work")say("Continuing.")}else stopSay();render()}
+function skip(d){var n=idx+d;if(phase==="rest"&&d>0){phase="work";rem=dur();render();if(running)announce();return}if(n<0||n>=S.length)return;phase="work";idx=n;rem=dur();render();if(running)announce()}
+$("play").onclick=toggle;$("next").onclick=function(){skip(1)};$("prev").onclick=function(){skip(-1)};
+$("dur").onchange=function(){if(phase==="work"){rem=dur();render()}};
+$("again").onclick=function(){lastG="";done={};started=false;card.classList.remove("finished");load(0)};
+document.addEventListener("keydown",function(e){if(e.target.tagName==="SELECT"||e.target.tagName==="BUTTON"||e.target.dataset.i||e.target.dataset.g)return;if(e.code==="Space"){e.preventDefault();toggle()}});
+buildList();load(0);
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
